@@ -2,13 +2,10 @@
 
 ## Install
 
-SEAGAL works for Python3.9, it is advised to create a conda environment with Python3.9 and then install througth:
-
-
-We recommend using a conda environment to automatically install all required dependencies. Conda installation guide can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html. After installing conda, run the following command to install a ReST environment:
+SEAGAL works for Python3.9, it is advised to create a conda environment with Python3.9 to avoid conflicts of dependencies. Conda installation guide can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html. After installing conda, run the following command to install a `seagal` environment:
 
 ```bash
-conda env create -n seagal
+conda create -n seagal python=3.9
 ```
 
 Then install seagal through:
@@ -30,13 +27,16 @@ Please check if `echo $PATH` includes the path to python3.9 site-packages if `Er
   - meta.csv - spot meta data frame, with x, y columns denoting coordinates.
 
 ## Running SEAGAL with Visium Data
-  Please read [Tutorial1](./test/Tutorial1%20SEAGAL%20with%20Visium%20(SpaceRanger%20Output).ipynb) for instructions.
 
-## Running SEAGAL with CSV-format Data
-  Please read [Tutorial2](./test/Tutorial2%20SEAGAL%20with%20Customized%20Gene%20Sets.ipynb) for details.
+Please read [Tutorial1](./test/Tutorial1%20SEAGAL%20with%20Visium%20(SpaceRanger%20Output).ipynb) for instructions.
 
 ## Running SEAGAL with user-defined marker genes
-  Please read [Tutorial3](./test/Tutorial3%20SEAGAL%20with%20ST%20(csv%20files).ipynb) for details.
+
+Please read [Tutorial2](./test/Tutorial3%20SEAGAL%20with%20ST%20(csv%20files).ipynb) for details.
+
+## Running SEAGAL with CSV-format Data
+
+Please read [Tutorial3](./test/Tutorial2%20SEAGAL%20with%20Customized%20Gene%20Sets.ipynb) for details.
 
 <!-- ## Parameters 
   ### I/O parameters
