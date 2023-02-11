@@ -1,0 +1,17 @@
+README.md
+setup.py
+seagal/__init__.py
+seagal/_gmod.py
+seagal/_plotting.py
+seagal/_utils.py
+seagal/lee_vec.py
+seagal/seagal.py
+seagal/spatial_measure.py
+seagal.egg-info/PKG-INFO
+seagal.egg-info/SOURCES.txt
+seagal.egg-info/dependency_links.txt
+seagal.egg-info/not-zip-safe
+seagal.egg-info/requires.txt
+seagal.egg-info/top_level.txt
+seagal/modules/__init__.py
+seagal/modules/gmod.py

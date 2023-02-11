@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: seagal
+Version: 1.10.2
+Summary: Spatial Enrichment Analysis of Gene Association using L-index
+Home-page: https://github.com/linhuawang/SEAGAL
+Author: Linhua Wang
+Author-email: linhuaw@bcm.edu
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/markdown
+
+# Spatial Enrichment Analysis of Gene Association using L-index
