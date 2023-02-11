@@ -2,7 +2,7 @@
 
 ## Install
 
-SEAGAL works for Python3.9, it is advised to create a conda environment with Python3.9 to avoid conflicts of dependencies. Conda installation guide can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html. After installing conda, run the following command to install a `seagal` environment:
+SEAGAL works for Python3.9, it is advised to create a conda environment with Python3.9 to avoid conflicts of dependencies. Conda installation guide can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html. After installing conda, run the following command to create a `seagal` environment:
 
 ```bash
 conda create -n seagal python=3.9
