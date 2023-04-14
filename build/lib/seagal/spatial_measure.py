@@ -17,7 +17,7 @@ from statsmodels.stats.multitest import fdrcorrection
 #=========================================================================================
 
 
-def Global_L(anndat_sp, features=None, permutations=0, percent=0.1, seed=1, max_RAM=16):
+def Global_L(anndat_sp, features=None, permutations=0, indep=True, percent=0.1, seed=1, max_RAM=16):
     random.seed(seed)
     np.random.seed(seed)
 
@@ -58,8 +58,13 @@ def Global_L(anndat_sp, features=None, permutations=0, percent=0.1, seed=1, max_
     coexp_df['L.p_value'] = eSP.significance_ if permutations else 1.0
 
     if permutations:
-        _,coexp_df['L.FDR'] = fdrcorrection(coexp_df['L.p_value'],
+        if indep:
+            fdrs = fdrcorrection(coexp_df['L.p_value'],
                                             alpha=0.05, method='indep')
+        else:
+            fdrs =fdrcorrection(coexp_df['L.p_value'],
+                                            alpha=0.05, method='n')
+        _,coexp_df['L.FDR'] = fdrs
     else:
         coexp_df['L.FDR'] = 1.0
 

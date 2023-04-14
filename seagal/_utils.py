@@ -87,7 +87,7 @@ def spatial_pattern_genes(self, I=None, topK=None):
 
 def spatial_association(self, grouped_only=True, use_pattern_genes=True,
                         genes=None, n_permutation=99, permute_ratio=0.2,
-                        FDR_cutoff = 0.05, L_cutoff = 0.1):
+                        FDR_cutoff = 0.05, L_cutoff = 0.1, indep=True):
     """ Calculate spatial associations
     
         Prameters:
@@ -105,7 +105,8 @@ def spatial_association(self, grouped_only=True, use_pattern_genes=True,
     """
     if grouped_only:
         grouped_data = self.grouped_adata.copy()
-        grouped_data = Global_L(grouped_data, permutations=n_permutation, percent=permute_ratio, max_RAM=32)
+        grouped_data = Global_L(grouped_data, permutations=n_permutation,
+                                indep=indep, percent=permute_ratio, max_RAM=32)
         df = grouped_data.uns['co_expression'].copy()
         df['pair'] = df.gene_1 + "&" + df.gene_2
         vals  = df['L.FDR'].copy()
@@ -161,41 +162,70 @@ def group_adata_by_genes(self, ct_dict = None, inplace=True):
     pool_genes = data.var_names.tolist()
 
     if ct_dict is None:
-        ct_dict = {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A',
-                             'IGHD', 'IGHM', 'PAX5', 'IGLC2',
-                             'FCHSD2', 'CD79B', 'RALGPS2', 'LY6D',
-                              'MS4A1', 'MEF2C', 'IGLC3', 'BACH2', 'MAN1A',
-                               'CD55', 'BTLA', 'AFF3'],
-                    'DC': ['CD209A', 'CRIP1', 'CST3', 'CBFA2T3', 
-                            'TCF4', 'VIM', 'PID1', 'IRF8', 'FLT3',
-                             'TAGLN2', 'AHNAK', 'S100A4', 'IFI30',
-                              'LGALS1', 'CCND1', 'SYNGR2', 'H2AFY', 
-                              'BST2', 'LY6C2', 'CCDC88A'],
-                    'Macrophages': ['APOE', 'C1QB', 'C1QC', 'C1QA', 
-                                    'CCL4', 'RGS1', 'CD81', 'MS4A7',
-                                     'CTSB', 'LGMN', 'CTSS', 'SELENOP', 
-                                     'CD63', 'CD72', 'CCL3', 'CTSC', 
-                                     'TMEM176B', 'FTL1', 'ACP5', 'AIF1'], 
-                    'Monocytes': ['PLAC8', 'SLC8A1', 'FN1', 'S100A4', 
-                                    'LYZ2', 'LY6C2', 'F13A1', 'IFITM3', 
-                                    'CCR2', 'ADGRE4', 'CYBB', 'CRIP1',
-                                     'LDLRAD3', 'PID1', 'GPR141', 'LRP1',
-                                      'CCL9', 'ZEB2', 'AHNAK', 'IFITM6'], 
-                    'Neutrophils': ['S100A8', 'S100A9', 'RETNLG', 'CSF3R',
-                                     'IFITM1', 'SLPI', 'HDC', 'MMP9', 
-                                     'CXCR2', 'PBX1', 'WFDC21', 'MXD1', 
-                                     'CLEC4D', 'GDA', 'SLFN4', 'GSR',
-                                      'S100A11', 'IL1B', 'GCNT2', 'MSRB1'],
-                    'NK cells': ['GZMA', 'GZMB', 'CD7', 'CCL5', 
-                                    'NKG7', 'AW112010', 'IL2RB', 'KLRB1C', 
-                                    'KLRE1', 'KLRK1', 'CTSW', 'KLRA7', 
-                                    'KLRD1', 'NCR1', 'PRF1', 'ARSB', 
-                                    'LGALS1', 'ID2', 'CST7', 'CAR2'],
-                    'T cells': ['GM2682', 'LEF1', 'SKAP1', 'THEMIS',
-                                 'IL7R', 'ITK', 'PRKCQ', 'BCL11B',
-                                  'MS4A4B', 'CD247', 'TCF7', 'CD3E',
-                                   'CD3D', 'TRBC2', 'INPP4B', 'CD3G',
-                                    'GRAP2', 'CAMK4', 'SATB1', 'SIDT1']}
+        ct_dict = {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A', 'IGHD',
+                                'BACH2', 'IGHM', 'FCHSD2', 'LY6D', 'PAX5', 
+                                'RALGPS2', 'IGLC2', 'AFF3', 'MAN1A', 'BTLA',
+                                  'MEF2C', 'CD79B', 'MS4A1', 'FOXP1', 'CD55'],
+                    'Endothelial': ['WFDC18', 'CSN3', 'LCN2', 'PHLDA1','KRT18',
+                                    'MAP1LC3A', 'HRAS', 'AQP5', 'KRT8', 'CRIP2',
+                                    'CDKN1A', 'DBI', 'PGP', 'RPS27L', '1110008P14RIK', 
+                                    'SPINT2', 'MRPS6', 'DSTN', 'HMGN1', 'XBP1'],
+                    'ILC': ['CD7', 'GZMB', 'XCL1', 'IL2RB', 'NKG7',
+                            'CTSW', 'CCL5', 'AW112010', 'KLRD1', 'TMSB10', 
+                            'KLRB1C', 'CAR2', 'KLRK1', 'KLRE1', 'CST7', 
+                            'NCR1', 'LCK', 'SERPINA3G', 'SH2D2A', 'KLRB1A'],
+                    'Macrophages': ['APOE', 'C1QA', 'C1QC', 'C1QB', 'MS4A7',
+                                    'CD81', 'CCL4', 'RGS1', 'CD72', 'CTSS', 
+                                    'HEXB', 'CTSB', 'ACP5', 'CD63', 'LGMN', 
+                                    'LY86', 'AIF1', 'GRN', 'PLD4', 'CXCL16'], 
+                    'Monocytes': ['CRIP1', 'PLAC8', 'CCL6', 'S100A4', 'CCL9', 
+                                  'F13A1', 'AHNAK', 'CCR2', 'IFITM3', 'VIM', 
+                                  'ALOX5AP', 'IFITM6', 'PLTP', 'LYZ2', 'TAGLN2', 
+                                  'IFI27L2A', 'GPX1', 'PID1', 'ANXA2', 'EMP3'], 
+                    'Neutrophils': ['S100A8', 'S100A9', 'RETNLG', 'CSF3R', 'IFITM1', 
+                                    'SLPI', 'HDC', 'MMP9', 'CXCR2', 'PBX1', 'GSR', 
+                                    'MXD1', 'GDA', 'SORL1', 'CLEC4D', 'WFDC21', 
+                                    'S100A11', 'IL1R2', 'CD44', 'PGLYRP1'], 
+                    'T cells': ['GM2682', 'LEF1', 'SKAP1', 'CD3E', 'MS4A4B', 
+                                'ITK', 'CD3G', 'CD3D', 'INPP4B', 'LAT', 'SATB1', 
+                                'PRKCQ', 'THY1', 'CD247', 'TRBC2', 'BCL11B', 
+                                'NKG7', 'GRAP2', 'TCF7', 'BCL2']}
+
+        # ct_dict = {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A',
+        #                      'IGHD', 'IGHM', 'PAX5', 'IGLC2',
+        #                      'FCHSD2', 'CD79B', 'RALGPS2', 'LY6D',
+        #                       'MS4A1', 'MEF2C', 'IGLC3', 'BACH2', 'MAN1A',
+        #                        'CD55', 'BTLA', 'AFF3'],
+        #             'DC': ['CD209A', 'CRIP1', 'CST3', 'CBFA2T3', 
+        #                     'TCF4', 'VIM', 'PID1', 'IRF8', 'FLT3',
+        #                      'TAGLN2', 'AHNAK', 'S100A4', 'IFI30',
+        #                       'LGALS1', 'CCND1', 'SYNGR2', 'H2AFY', 
+        #                       'BST2', 'LY6C2', 'CCDC88A'],
+        #             'Macrophages': ['APOE', 'C1QB', 'C1QC', 'C1QA', 
+        #                             'CCL4', 'RGS1', 'CD81', 'MS4A7',
+        #                              'CTSB', 'LGMN', 'CTSS', 'SELENOP', 
+        #                              'CD63', 'CD72', 'CCL3', 'CTSC', 
+        #                              'TMEM176B', 'FTL1', 'ACP5', 'AIF1'], 
+        #             'Monocytes': ['PLAC8', 'SLC8A1', 'FN1', 'S100A4', 
+        #                             'LYZ2', 'LY6C2', 'F13A1', 'IFITM3', 
+        #                             'CCR2', 'ADGRE4', 'CYBB', 'CRIP1',
+        #                              'LDLRAD3', 'PID1', 'GPR141', 'LRP1',
+        #                               'CCL9', 'ZEB2', 'AHNAK', 'IFITM6'], 
+        #             'Neutrophils': ['S100A8', 'S100A9', 'RETNLG', 'CSF3R',
+        #                              'IFITM1', 'SLPI', 'HDC', 'MMP9', 
+        #                              'CXCR2', 'PBX1', 'WFDC21', 'MXD1', 
+        #                              'CLEC4D', 'GDA', 'SLFN4', 'GSR',
+        #                               'S100A11', 'IL1B', 'GCNT2', 'MSRB1'],
+        #             'NK cells': ['GZMA', 'GZMB', 'CD7', 'CCL5', 
+        #                             'NKG7', 'AW112010', 'IL2RB', 'KLRB1C', 
+        #                             'KLRE1', 'KLRK1', 'CTSW', 'KLRA7', 
+        #                             'KLRD1', 'NCR1', 'PRF1', 'ARSB', 
+        #                             'LGALS1', 'ID2', 'CST7', 'CAR2'],
+        #             'T cells': ['GM2682', 'LEF1', 'SKAP1', 'THEMIS',
+        #                          'IL7R', 'ITK', 'PRKCQ', 'BCL11B',
+        #                           'MS4A4B', 'CD247', 'TCF7', 'CD3E',
+        #                            'CD3D', 'TRBC2', 'INPP4B', 'CD3G',
+        #                             'GRAP2', 'CAMK4', 'SATB1', 'SIDT1']}
     cts = list(ct_dict.keys())
     if len(cts) < 2:
         print("Please include at list 2 groups to compare against each other and call the function again.")
@@ -273,7 +303,7 @@ def module_pattern(self, ncols=4, alpha_img=0.5, cmap='Reds'):
 
 
 
-def module_hotspot(self, dropout_rm=True, alpha_img=0.5, cmap='Blues_r', ncols=4):
+def module_hotspot(self, dropout_rm=True, alpha_img=0.5, cmap='Blues_r', ncols=4, vmin=-1, vmax=1):
     mod2gene = self.module_dict['mod2gene'].copy()
     modules = list(mod2gene.keys())
     n_modules = len(modules)
@@ -294,16 +324,21 @@ def module_hotspot(self, dropout_rm=True, alpha_img=0.5, cmap='Blues_r', ncols=4
                     color=pairs, 
                     cmap=cmap,
                     alpha_img=alpha_img, 
-                    ncols=ncols)
+                    ncols=ncols,
+                    vmin=vmin,
+                    vmax=vmax)
     else:
         import math
         f, axs = plt.subplots(math.ceil(len(pairs)/ncols), ncols,
                          figsize=(ncols * 5, math.ceil(len(pairs)/ncols)* 4))
         for i in range(len(pairs)):
             ax = axs.flatten()[i]
+            vals = np.ravel(adata.obs[pairs[i]].to_numpy())
+            vals[vals < vmin] = vmin
+            vals[vals > vmax] = vmax
             im = ax.scatter(x=adata.obs.x.copy(),
                             y=adata.obs.y.copy(),
-                            c=np.ravel(adata.obs[pairs[i]].to_numpy()), cmap=cmap)
+                            c=vals, cmap=cmap)
             ax.axis("off")
             ax.set_title(pairs[i])
             clb = f.colorbar(im, ax=ax)

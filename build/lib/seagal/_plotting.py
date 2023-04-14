@@ -5,7 +5,8 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
-def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False, cmap='viridis', alpha_img=0.5):
+def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False,
+             cmap='viridis', alpha_img=0.5, vmin=-1, vmax=1):
     """ Calculate local L-index for var pairs (var_1 and var_2). 
     """
 
@@ -28,11 +29,14 @@ def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False, cmap='viridi
     adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'].ravel()
     f, ax = plt.subplots(1,1, figsize=(5,4))
     if self.data_type == 'visium':
-        sc.pl.spatial(adata, color=f'{var_1} & {var_2}', ax=ax, cmap=cmap, alpha_img=alpha_img)
-    else:        
+        sc.pl.spatial(adata, color=f'{var_1} & {var_2}', ax=ax, cmap=cmap, alpha_img=alpha_img, vmin=vmin, vmax=vmax)
+    else:
+        vals = np.ravel(adata.obs[f'{var_1} & {var_2}'].to_numpy())
+        vals[vals < vmin] = vmin
+        vals[vals > vmax] = vmax
         im=ax.scatter(x=adata.obs.x.copy(),
                     y=adata.obs.y.copy(),
-                    c=np.ravel(adata.obs[f'{var_1} & {var_2}'].to_numpy()), cmap=cmap)
+                    c=vals, cmap=cmap)
         ax.axis("off")
         ax.set_title(f'{var_1} & {var_2}')
         clb = f.colorbar(im, ax=ax)
