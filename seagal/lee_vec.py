@@ -105,7 +105,7 @@ class Spatial_Pearson(BaseEstimator):
             return self
         elif self.permutations < 1:
             return self
-
+        
         if self.permutations:
             self.reference_distribution_ = numpy.zeros((self.permutations, X.shape[1]))
 
@@ -122,6 +122,7 @@ class Spatial_Pearson(BaseEstimator):
             #extreme = numpy.minimum(self.permutations - larger, larger)
             #self.significance_ = (extreme + 1.0) / (self.permutations + 1.0)
             self.significance_ = scipy.stats.norm.sf(numpy.abs(self.z_sim))
+           
         return self
 
     @staticmethod
@@ -262,19 +263,20 @@ class Spatial_Pearson_Local(BaseEstimator):
                     rnd_index = numpy.random.permutation(numpy.arange(X.shape[0]))
                     perm_X[j] = X[rnd_index,i]
                     perm_Y[j] = Y[rnd_index,i]
+                
 
                 reference_distribution = numpy.transpose(
-                    (numpy.transpose(perm_Y[:,:,numpy.newaxis], (0,2,1)) @ self.standard_connectivity.T), (0, 2, 1)
-                    ) * (self.standard_connectivity @ perm_X[:,:,numpy.newaxis])
+                    (numpy.transpose(perm_Y[:,:,numpy.newaxis], (0,2,1)) @ self.standard_connectivity.T.toarray()), (0, 2, 1)
+                    ) * (self.standard_connectivity.toarray() @ perm_X[:,:,numpy.newaxis])
 
                 above = reference_distribution.squeeze(-1) >= numpy.repeat(self.associations_[:,i][numpy.newaxis,:],self.permutations,axis=0)
                 larger = above.sum(axis=0)
                 extreme = numpy.minimum(larger, self.permutations - larger)
                 self.significance_[:,i] = (extreme + 1.0) / (self.permutations + 1.0)
 
-
         else:
             self.reference_distribution_ = None
+            
         return self
 
     @staticmethod

@@ -24,9 +24,10 @@ def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False,
     if var_1 not in adata.var_names or var_2 not in adata.var_names:
         print("One of the queried features is not in the adata. Check if the correct `use_grouped` parameter is used, or typos in the names.")
         return
-
-    adata1 = Local_L(adata, var_1, var_2, dropout_rm=dropout_rm, max_RAM=32)
-    adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'].ravel()
+    if f'{var_1}_{var_2}' not in adata.uns.get('Local_L_names',[]):
+        adata1 = Local_L(adata, [var_1], [var_2], dropout_rm=dropout_rm, max_RAM=32)
+        
+    adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'][:,adata.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
     f, ax = plt.subplots(1,1, figsize=(5,4))
     if self.data_type == 'visium':
         sc.pl.spatial(adata, color=f'{var_1} & {var_2}', ax=ax, cmap=cmap, alpha_img=alpha_img, vmin=vmin, vmax=vmax)

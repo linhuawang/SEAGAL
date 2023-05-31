@@ -85,7 +85,7 @@ def Global_L(anndat_sp, features=None, permutations=0, indep=True, percent=0.1, 
 
 
 def Local_L(anndat_sp,
-            var_1, var_2,
+            vars_1, vars_2,
             dropout_rm=True,
             permutations=0, seed=1, max_RAM=32):
     random.seed(seed)
@@ -95,17 +95,31 @@ def Local_L(anndat_sp,
     print("Calculating local spatial correlation value...")
     
         
-    L_mtx, L_mtx_names = _calculate_LL(anndat_sp, var_1, var_2,
-                                       permutations=permutations, seed=seed, max_RAM=max_RAM)
+    L_mtx, L_mtx_names, local_p_df = _calculate_LL(anndat_sp, vars_1, vars_2,
+                                                   permutations=permutations, seed=seed, max_RAM=max_RAM)
 
     if dropout_rm:
         # print("Set L to 0 for cells with no expression on either feature of a certain pair...")
         GP_names = L_mtx_names
         Dropout_mtx = dropout_filter(anndat_sp, GP_names)
         L_mtx = L_mtx * Dropout_mtx
-
-    anndat_sp.uns['Local_L'] = L_mtx
-    anndat_sp.uns['Local_L_names'] = L_mtx_names
+    
+    if 'Local_L' in anndat_sp.uns.keys():
+        anndat_sp.uns['Local_L'] = np.concatenate((anndat_sp.uns['Local_L'], L_mtx), axis=1)
+        anndat_sp.uns['Local_L_names'] = np.concatenate((anndat_sp.uns['Local_L_names'], L_mtx_names), axis=None) #L_mtx_names
+        # remove duplicates
+        anndat_sp.uns['Local_L'] = anndat_sp.uns['Local_L'][:,(~(pd.Series(anndat_sp.uns['Local_L_names']).duplicated())).to_numpy()]
+        anndat_sp.uns['Local_L_names'] = anndat_sp.uns['Local_L_names'][(~(pd.Series(anndat_sp.uns['Local_L_names']).duplicated())).to_numpy()]
+    else:
+        anndat_sp.uns['Local_L'] = L_mtx
+        anndat_sp.uns['Local_L_names'] = L_mtx_names
+    
+    if permutations:
+        if 'Local_pval' in anndat_sp.uns.keys():
+            anndat_sp.uns['Local_pval'] = pd.concat([anndat_sp.uns['Local_pval'], local_p_df], axis=1)
+            anndat_sp.uns['Local_pval'] = anndat_sp.uns['Local_pval'].loc[:,~(anndat_sp.uns['Local_pval'].columns.duplicated())]
+        else:
+            anndat_sp.uns['Local_pval'] = local_p_df
 
     #anndat_sp.uns['peaks_nearby'] = peaks_nearby_orig.copy()
     # print("Following changes made to the AnnData object:")
@@ -118,7 +132,7 @@ def Local_L(anndat_sp,
 
 
 def _calculate_LL(anndat_sp,
-                  var_1, var_2,
+                  vars_1, vars_2,
                   permutations=0, seed=1, max_RAM=16):
     random.seed(seed)
     np.random.seed(seed)
@@ -130,16 +144,9 @@ def _calculate_LL(anndat_sp,
     
     #if features is None:
     #    features = anndat_sp.var_names.to_numpy()
-    features_1 = [var_1]
-    features_2 = [var_2]
-    pair_names = [str(var_1) + '_' + str(var_2)]
-    '''
-    for i in range(len(features)):
-        for j in range(i+1, len(features)):
-            features_1.append(str(features[i]))
-            features_2.append(str(features[j]))
-            pair_names.append(str(features[i]) + '_' + str(features[j]))
-    '''
+    features_1 = vars_1 #[var_1]
+    features_2 = vars_2 #[var_2]
+    pair_names = [str(vars_1[i]) + '_' + str(vars_2[i]) for i in range(len(vars_1))]
 
     features_1 = np.array(features_1)
     features_2 = np.array(features_2)
@@ -160,10 +167,12 @@ def _calculate_LL(anndat_sp,
     if permutations:
         local_p_df = pd.DataFrame(eSP2.significance_)
         local_p_df.columns = pair_names
+    else:
+        local_p_df = pd.DataFrame()
 
     L_mtx = local_L_df.to_numpy()
 
-    return L_mtx, local_L_df.columns.to_numpy()
+    return L_mtx, local_L_df.columns.to_numpy(), local_p_df
 
 
 
