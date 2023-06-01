@@ -30,7 +30,6 @@ def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False,
     else:
         adata.obs[f'{var_1} & {var_2}'] = adata.uns['Local_L'][:,adata.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
         
-    adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'][:,adata.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
     f, ax = plt.subplots(1,1, figsize=(5,4))
     if self.data_type == 'visium':
         sc.pl.spatial(adata, color=f'{var_1} & {var_2}', ax=ax, cmap=cmap, alpha_img=alpha_img, vmin=vmin, vmax=vmax)
