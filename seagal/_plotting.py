@@ -26,6 +26,9 @@ def hotspot(self, var_1, var_2, dropout_rm=True, use_grouped=False,
         return
     if f'{var_1}_{var_2}' not in adata.uns.get('Local_L_names',[]):
         adata1 = Local_L(adata, [var_1], [var_2], dropout_rm=dropout_rm, max_RAM=32)
+        adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'][:,adata1.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
+    else:
+        adata.obs[f'{var_1} & {var_2}'] = adata.uns['Local_L'][:,adata.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
         
     adata.obs[f'{var_1} & {var_2}'] = adata1.uns['Local_L'][:,adata.uns['Local_L_names']==f'{var_1}_{var_2}'][:,0].ravel()
     f, ax = plt.subplots(1,1, figsize=(5,4))
