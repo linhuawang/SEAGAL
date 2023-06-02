@@ -152,17 +152,27 @@ def spatial_association(self, grouped_only=True, use_pattern_genes=True,
     df.loc[(df['L.FDR'] <= FDR_cutoff) & (df['L'] <= -L_cutoff), "Association"] = "SigNeg"
     self.co_expression = df
 
-def group_adata_by_genes(self, ct_dict = None, inplace=True):
+def group_adata_by_genes(self, ct_dict = None, inplace=True, reference='hpca'):
     ## Overwrite self.co_expression_grouped object if existed.
-    if self.co_expression_grouped is not None:
-        self.co_expression_grouped = None
-
-    data = self.raw_adata.copy()
-    sc.pp.normalize_total(data, target_sum=10**6)
-    pool_genes = data.var_names.tolist()
-
-    if ct_dict is None:
-        ct_dict = {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A', 'IGHD',
+    MARKER_KNOWLEDGBASE = {'hpca':{'B cells': ['POU2AF1', 'MS4A1', 'JCHAIN', 'VPREB3', 'IGLL3P', 'IGHM',
+                                         'TCL1A', 'STAP1', 'BLNK', 'TNFRSF17', 'CD19', 'CR2', 'CD79A', 
+                                         'HLA-DOB', 'IGKC', 'FCRLA', 'P2RX5', 'GUSBP11', 'CD79B', 'RGS13'],
+                         'Endothelial cells': ['GJA1', 'CTGF', 'EFEMP1', 'PLS3', 'CAV1', 'CDH5', 'ESM1',
+                                         'ARHGAP29', 'ADGRL4', 'FSTL1', 'MMP1', 'SRPX', 'CYR61', 'CAV2', 'LAMB1',
+                                          'TM4SF1', 'MMRN1', 'NNMT', 'HHIP', 'GNG11'], 
+                        'Macrophages': ['GPNMB', 'MRC1', 'CHI3L1', 'SPP1', 'PLA2G7', 'APOC1', 
+                                        'LPL', 'APOE', 'ADAMDEC1', 'CCL18', 'C1QA', 'C15orf48',
+                                         'DCSTAMP', 'FBP1', 'C1QC', 'C1QB', 'NR1H3', 'CYP1B1', 'MMP9', 'A2M'],
+                        'Monocytes': ['FCN1', 'VCAN', 'S100A12', 'S100A8', 'CSTA', 'CX3CR1', 'LYZ', 'MPEG1',
+                                         'CD14', 'S100A9', 'LILRB2', 'RGS18', 'TYROBP', 'MNDA', 'CPVL',
+                                          'APOBEC3A', 'HCK', 'CFP', 'NCF2', 'FCER1G'],
+                        'Neutrophils': ['PI3', 'CXCR2', 'FCGR3B', 'STEAP4', 'PROK2', 'MGAM', 'IL1R2',
+                                        'TNFAIP6', 'S100P', 'S100A12', 'CLC', 'KCNJ15', 'G0S2', 'KRT23',
+                                         'PTGS2', 'P2RY14', 'CXCL1', 'TREM1', 'FFAR2', 'OSM'], 
+                        'T cells': ['ITK', 'CD3D', 'TRBC1', 'TRAT1', 'TRAC', 'CD3G', 'CD2',
+                                         'LCK', 'NELL2', 'NLRC3', 'GPR171', 'THEMIS', 'CD69',
+                                          'KLRB1', 'RASGRP1', 'BCL11B', 'GZMK', 'GZMA', 'TC2N', 'ITM2A']}
+                'mouse_immune': {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A', 'IGHD',
                                 'BACH2', 'IGHM', 'FCHSD2', 'LY6D', 'PAX5', 
                                 'RALGPS2', 'IGLC2', 'AFF3', 'MAN1A', 'BTLA',
                                   'MEF2C', 'CD79B', 'MS4A1', 'FOXP1', 'CD55'],
@@ -191,41 +201,18 @@ def group_adata_by_genes(self, ct_dict = None, inplace=True):
                                 'PRKCQ', 'THY1', 'CD247', 'TRBC2', 'BCL11B', 
                                 'NKG7', 'GRAP2', 'TCF7', 'BCL2']}
 
-        # ct_dict = {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A',
-        #                      'IGHD', 'IGHM', 'PAX5', 'IGLC2',
-        #                      'FCHSD2', 'CD79B', 'RALGPS2', 'LY6D',
-        #                       'MS4A1', 'MEF2C', 'IGLC3', 'BACH2', 'MAN1A',
-        #                        'CD55', 'BTLA', 'AFF3'],
-        #             'DC': ['CD209A', 'CRIP1', 'CST3', 'CBFA2T3', 
-        #                     'TCF4', 'VIM', 'PID1', 'IRF8', 'FLT3',
-        #                      'TAGLN2', 'AHNAK', 'S100A4', 'IFI30',
-        #                       'LGALS1', 'CCND1', 'SYNGR2', 'H2AFY', 
-        #                       'BST2', 'LY6C2', 'CCDC88A'],
-        #             'Macrophages': ['APOE', 'C1QB', 'C1QC', 'C1QA', 
-        #                             'CCL4', 'RGS1', 'CD81', 'MS4A7',
-        #                              'CTSB', 'LGMN', 'CTSS', 'SELENOP', 
-        #                              'CD63', 'CD72', 'CCL3', 'CTSC', 
-        #                              'TMEM176B', 'FTL1', 'ACP5', 'AIF1'], 
-        #             'Monocytes': ['PLAC8', 'SLC8A1', 'FN1', 'S100A4', 
-        #                             'LYZ2', 'LY6C2', 'F13A1', 'IFITM3', 
-        #                             'CCR2', 'ADGRE4', 'CYBB', 'CRIP1',
-        #                              'LDLRAD3', 'PID1', 'GPR141', 'LRP1',
-        #                               'CCL9', 'ZEB2', 'AHNAK', 'IFITM6'], 
-        #             'Neutrophils': ['S100A8', 'S100A9', 'RETNLG', 'CSF3R',
-        #                              'IFITM1', 'SLPI', 'HDC', 'MMP9', 
-        #                              'CXCR2', 'PBX1', 'WFDC21', 'MXD1', 
-        #                              'CLEC4D', 'GDA', 'SLFN4', 'GSR',
-        #                               'S100A11', 'IL1B', 'GCNT2', 'MSRB1'],
-        #             'NK cells': ['GZMA', 'GZMB', 'CD7', 'CCL5', 
-        #                             'NKG7', 'AW112010', 'IL2RB', 'KLRB1C', 
-        #                             'KLRE1', 'KLRK1', 'CTSW', 'KLRA7', 
-        #                             'KLRD1', 'NCR1', 'PRF1', 'ARSB', 
-        #                             'LGALS1', 'ID2', 'CST7', 'CAR2'],
-        #             'T cells': ['GM2682', 'LEF1', 'SKAP1', 'THEMIS',
-        #                          'IL7R', 'ITK', 'PRKCQ', 'BCL11B',
-        #                           'MS4A4B', 'CD247', 'TCF7', 'CD3E',
-        #                            'CD3D', 'TRBC2', 'INPP4B', 'CD3G',
-        #                             'GRAP2', 'CAMK4', 'SATB1', 'SIDT1']}
+    }
+
+    if self.co_expression_grouped is not None:
+        self.co_expression_grouped = None
+
+    data = self.raw_adata.copy()
+    sc.pp.normalize_total(data, target_sum=10**6)
+    pool_genes = data.var_names.tolist()
+
+    if ct_dict is None:
+        ct_dict = MARKER_KNOWLEDGBASE[reference]
+
     cts = list(ct_dict.keys())
     if len(cts) < 2:
         print("Please include at list 2 groups to compare against each other and call the function again.")
