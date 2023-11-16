@@ -12,11 +12,12 @@ Then install seagal through:
 
 ```bash
 conda activate seagal
-conda install pip
-pip install seagal
+conda install -n seagal pip3
+pip3 install seagal
 ```
 
-Please check if `echo $PATH` includes the path to python3.9 site-packages if `Error: module seagal not found` occurs when importing.
+Please also install other necessary packages such as `jupyter` for your research needs.
+If `Error: module seagal not found` occurs when importing, please check if `echo $PATH` includes the path to python3.9 site packages.
 
 ## Input data format
 1. For 10X Visium, Space Ranger `Folder` with the following contents:

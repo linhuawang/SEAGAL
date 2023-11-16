@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='seagal',
-    version='2.5',
+    version='2.5.1',
     description='Spatial Enrichment Analysis of Gene Association using L-index',
     long_description=long_description,
     long_description_content_type="text/markdown",
