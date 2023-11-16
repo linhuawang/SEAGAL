@@ -1,5 +1,11 @@
 # Spatial Enrichment Analysis of Gene Association using L-index
 
+## Reference
+
+To cite our tool published in Oxford Bioinformatics: 
+
+	Linhua Wang, Chaozhong Liu, Yang Gao, Xiang H-F Zhang, Zhandong Liu, Unravelling spatial gene associations with SEAGAL: a Python package for spatial transcriptomics data analysis and visualization, Bioinformatics, Volume 39, Issue 7, July 2023, btad431, https://doi.org/10.1093/bioinformatics/btad431
+
 ## Install
 
 SEAGAL works for Python3.9, it is advised to create a conda environment with Python3.9 to avoid conflicts of dependencies. Conda installation guide can be found at https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html. After installing conda, run the following command to create a `seagal` environment:

@@ -5,8 +5,15 @@ from sklearn import preprocessing
 from sklearn import utils
 import random
 import scipy.stats
+import psutil
 
-
+def get_memory():
+    # Get the virtual memory usage details
+    memory = psutil.virtual_memory()
+    # Calculate the free memory in MB
+    free_memory_mb = (memory.available / 1024.0) / 1024.0
+    return free_memory_mb
+"""
 def get_memory():
     with open('/proc/meminfo', 'r') as mem:
         free_memory = 0
@@ -15,7 +22,7 @@ def get_memory():
             if str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
                 free_memory += int(sline[1])
     return free_memory / 1024
-
+"""
 
 class Spatial_Pearson(BaseEstimator):
     """Global Spatial Pearson Statistic"""
