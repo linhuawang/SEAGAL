@@ -5,20 +5,20 @@ with open("README.md", "r") as fh:
 
 setup(
     name='seagal',
-    version='2.2',
+    version='2.5',
     description='Spatial Enrichment Analysis of Gene Association using L-index',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/linhuawang/SEAGAL',
     author='Linhua Wang',
-    author_email='linhuaw@bcm.edu',
+    author_email='linhua.wang1994@gmail.com',
     license='MIT',
     zip_safe=False,
     packages=find_packages(),
     install_requires=[
           'scanpy[leiden]', 'numpy', 'anndata',
           'pandas', 'matplotlib', 'seaborn', 'scipy',
-          'squidpy', 'sklearn', 'libpysal', 'statsmodels'
+          'squidpy', 'scikit-learn', 'libpysal', 'statsmodels'
       ],
     classifiers=[
         "Programming Language :: Python :: 3",
