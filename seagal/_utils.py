@@ -171,7 +171,7 @@ def group_adata_by_genes(self, ct_dict = None, inplace=True, reference='hpca'):
                                          'PTGS2', 'P2RY14', 'CXCL1', 'TREM1', 'FFAR2', 'OSM'], 
                         'T cells': ['ITK', 'CD3D', 'TRBC1', 'TRAT1', 'TRAC', 'CD3G', 'CD2',
                                          'LCK', 'NELL2', 'NLRC3', 'GPR171', 'THEMIS', 'CD69',
-                                          'KLRB1', 'RASGRP1', 'BCL11B', 'GZMK', 'GZMA', 'TC2N', 'ITM2A']}
+                                          'KLRB1', 'RASGRP1', 'BCL11B', 'GZMK', 'GZMA', 'TC2N', 'ITM2A']},
                 'mouse_immune': {'B cells': ['IGKC', 'EBF1', 'BANK1', 'CD79A', 'IGHD',
                                 'BACH2', 'IGHM', 'FCHSD2', 'LY6D', 'PAX5', 
                                 'RALGPS2', 'IGLC2', 'AFF3', 'MAN1A', 'BTLA',

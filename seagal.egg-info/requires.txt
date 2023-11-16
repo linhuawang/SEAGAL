@@ -6,6 +6,6 @@ matplotlib
 seaborn
 scipy
 squidpy
-sklearn
+scikit-learn
 libpysal
 statsmodels
